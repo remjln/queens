@@ -1,16 +1,17 @@
 <template>
-  <div class="flex items-center justify-center max-w-xl mx-auto my-8">
-    <div v-if="grid" class="w-full grid gap-px select-none"
+  <div class="flex items-center justify-center max-w-xl mx-auto my-2 p-2">
+    <div v-if="grid" class="w-full grid gap-px select-none touch-none"
       :style="{ gridTemplateColumns: `repeat(${gridSize}, 1fr)`, gridTemplateRows: `repeat(${gridSize}, 1fr)` }">
       <template v-for="y in gridSize" :key="`y${y}`">
         <template v-for="x in gridSize" :key="`x${x}`">
           <div
-            class="bg-gray-200 aspect-square flex items-center justify-center hover:opacity-50 cursor-pointer"
+            class="cell bg-gray-200 aspect-square flex items-center justify-center cursor-pointer"
             :style="{ backgroundColor: colorPalette[grid[y - 1][x - 1].zone % colorPalette.length] }"
-            @mouseenter="onCellClick(x - 1, y - 1, true)"
-            @mousedown="mousedown = true; onCellClick(x - 1, y - 1, false)">
-            <Icon v-if="grid[y - 1][x - 1].content === 'queen'" name="tabler:crown" class="size-2/3 pointer-events-none text-neutral-700"></Icon>
-            <Icon v-else-if="grid[y - 1][x - 1].content?.includes('marker')" name="tabler:point-filled" class="size-1/3 pointer-events-none opacity-90 text-neutral-700"></Icon>
+            @pointerenter="onCellClick(x - 1, y - 1)"
+            @pointerdown="($event?.target as Element)?.releasePointerCapture?.($event.pointerId); if(touch) $event.preventDefault(); if(!touch) mousedown = true"
+            @mousedown="onCellClick(x - 1, y - 1)">
+            <Icon v-if="grid[y - 1][x - 1].content === 'queen'" name="tabler:crown" class="size-2/3 pointer-events-none text-neutral-700/90"></Icon>
+            <Icon v-else-if="grid[y - 1][x - 1].content?.includes('marker')" name="tabler:point-filled" class="size-1/3 pointer-events-none text-neutral-700/90"></Icon>
           </div>
         </template>
       </template>
@@ -26,10 +27,11 @@ const level = route.query.level
 const size = parseInt(route.query.size as string) || 8
 
 const rand = new Rand(`${level}`, PRNG.xoshiro128ss)
-
 function randInt(min: number, max: number): number {
   return Math.floor(rand.next() * (max - min + 1)) + min
 }
+
+const touch = ref(false)
 
 const gridSize = size < 4 ? 4 : size > 16 ? 16 : size
 
@@ -90,8 +92,10 @@ function removeMarkersForQueen(x: number, y: number) {
 }
 
 const mousedown = ref(false)
-function onCellClick(x: number, y: number, dragging: boolean) {  
-  if (!grid.value || !mousedown.value) return
+function onCellClick(x: number, y: number) {  
+  console.log(`Cell clicked: (${x}, ${y})`, mousedown.value, touch.value);
+  
+  if (!grid.value || !(mousedown.value || touch.value)) return
   const cell = grid.value[y][x]
   if (!cell.content) {
     cell.content = 'user-marker'
@@ -183,6 +187,7 @@ const grid = ref<Cell[][]>()
 grid.value = generateBoard(gridSize)
 
 onMounted(() => {
+  touch.value = matchMedia('(hover: none) and (pointer: coarse)').matches
   document.addEventListener('mouseup', () => {
     mousedown.value = false
   })
@@ -191,5 +196,9 @@ onMounted(() => {
 </script>
 
 <style>
-
+@media (pointer: fine) {
+  .cell:hover {
+    opacity: 0.5;
+  }
+}
 </style>
