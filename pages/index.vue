@@ -8,7 +8,7 @@
             class="cell bg-gray-200 aspect-square flex items-center justify-center cursor-pointer"
             :style="{ backgroundColor: colorPalette[grid[y - 1][x - 1].zone % colorPalette.length] }"
             @pointerenter="onCellClick(x - 1, y - 1)"
-            @pointerdown="($event?.target as Element)?.releasePointerCapture?.($event.pointerId); if(touch) $event.preventDefault(); if(!touch) mousedown = true"
+            @pointerdown="($event?.target as Element)?.releasePointerCapture?.($event.pointerId); if(touch) $event.preventDefault(); mousedown = true"
             @mousedown="onCellClick(x - 1, y - 1)">
             <Icon v-if="grid[y - 1][x - 1].content === 'queen'" name="tabler:crown" class="size-2/3 pointer-events-none text-neutral-700/90"></Icon>
             <Icon v-else-if="grid[y - 1][x - 1].content?.includes('marker')" name="tabler:point-filled" class="size-1/3 pointer-events-none text-neutral-700/90"></Icon>
@@ -32,6 +32,11 @@ function randInt(min: number, max: number): number {
 }
 
 const touch = ref(false)
+const mousedown = ref(false)
+const dragAction = ref<'queen' | 'marker' | 'remove' | null>(null)
+watch(mousedown, (value) => {
+  if (!value) dragAction.value = null
+})
 
 const gridSize = size < 4 ? 4 : size > 16 ? 16 : size
 
@@ -91,19 +96,26 @@ function removeMarkersForQueen(x: number, y: number) {
     grid.value[y + 1][x - 1].content = null
 }
 
-const mousedown = ref(false)
 function onCellClick(x: number, y: number) {  
-  console.log(`Cell clicked: (${x}, ${y})`, mousedown.value, touch.value);
-  
-  if (!grid.value || !(mousedown.value || touch.value)) return
+  if (!grid.value || !(mousedown.value || touch.value))
+    return
+
   const cell = grid.value[y][x]
-  if (!cell.content) {
+  if (dragAction.value) {
+    if (dragAction.value === 'marker' && cell.content === null)
+      cell.content = 'user-marker'
+    if (dragAction.value === 'remove' && cell.content?.includes('marker'))
+      cell.content = null
+  } else if (!cell.content) {
     cell.content = 'user-marker'
+    dragAction.value = 'marker'
   } else if (cell.content.includes('marker')) {
     cell.content = 'queen'
+    dragAction.value = 'queen'
     putMarkersForQueen(x, y)
   } else {
     cell.content = null
+    dragAction.value = 'remove'
     removeMarkersForQueen(x, y)
   }
 }
@@ -188,9 +200,9 @@ grid.value = generateBoard(gridSize)
 
 onMounted(() => {
   touch.value = matchMedia('(hover: none) and (pointer: coarse)').matches
-  document.addEventListener('mouseup', () => {
-    mousedown.value = false
-  })
+  matchMedia('(hover: none) and (pointer: coarse)').addEventListener('change', e => touch.value = e.matches)
+  document.addEventListener('mouseup', () => mousedown.value = false)
+  document.addEventListener('pointerup', () => mousedown.value = false)
 })
 
 </script>
