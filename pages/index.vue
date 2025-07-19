@@ -1,16 +1,22 @@
 <template>
   <div class="flex items-center justify-center max-w-xl mx-auto my-2 p-2">
-    <div v-if="grid" class="w-full grid gap-px select-none touch-none"
+    <div v-if="grid" class="w-full grid select-none touch-none border border-neutral-700/90"
       :style="{ gridTemplateColumns: `repeat(${gridSize}, 1fr)`, gridTemplateRows: `repeat(${gridSize}, 1fr)` }">
       <template v-for="y in gridSize" :key="`y${y}`">
         <template v-for="x in gridSize" :key="`x${x}`">
           <div
             class="cell bg-gray-200 aspect-square flex items-center justify-center cursor-pointer"
-            :style="{ backgroundColor: colorPalette[grid[y - 1][x - 1].zone % colorPalette.length] }"
+            :style="{ 
+              backgroundColor: colorPalette[grid[y - 1][x - 1].zone % colorPalette.length],
+              borderRight: x == gridSize || grid[y - 1][x - 1].zone !== grid[y - 1][x].zone ? '1px solid rgb(64 64 64 / 0.9)' : '1px solid #ffffff30',
+              borderBottom: y == gridSize || grid[y - 1][x - 1].zone !== grid[y][x - 1].zone ? '1px solid rgb(64 64 64 / 0.9)' : '1px solid #ffffff30',
+              borderLeft: x == 1 || grid[y - 1][x - 1].zone !== grid[y - 1][x - 2].zone ? '1px solid rgb(64 64 64 / 0.9)' : '1px solid #ffffff30',
+              borderTop: y == 1 || grid[y - 1][x - 1].zone !== grid[y - 2][x - 1].zone ? '1px solid rgb(64 64 64 / 0.9)' : '1px solid #ffffff30'
+            }"
             @pointerenter="onCellClick(x - 1, y - 1)"
             @pointerdown="($event?.target as Element)?.releasePointerCapture?.($event.pointerId); if(touch) $event.preventDefault(); mousedown = true"
             @mousedown="onCellClick(x - 1, y - 1)">
-            <Icon v-if="grid[y - 1][x - 1].content === 'queen'" name="tabler:crown" class="size-2/3 pointer-events-none text-neutral-700/90"></Icon>
+            <Icon v-if="grid[y - 1][x - 1].content === 'queen'" name="tabler:chess-queen-filled" class="size-2/3 pointer-events-none text-neutral-700/90"></Icon>
             <Icon v-else-if="grid[y - 1][x - 1].content?.includes('marker')" name="tabler:point-filled" class="size-1/3 pointer-events-none text-neutral-700/90"></Icon>
           </div>
         </template>
@@ -25,6 +31,9 @@ import Rand, { PRNG } from 'rand-seed'
 const route = useRoute()
 const level = route.query.level
 const size = parseInt(route.query.size as string) || 8
+
+if (!level)
+  navigateTo(`/?level=${Math.random().toString(36).substring(2, 15)}`)
 
 const rand = new Rand(`${level}`, PRNG.xoshiro128ss)
 function randInt(min: number, max: number): number {
@@ -209,8 +218,18 @@ onMounted(() => {
 
 <style>
 @media (pointer: fine) {
-  .cell:hover {
-    opacity: 0.5;
+  .cell {
+    position: relative;
+  }
+
+  .cell:hover:after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #ffffff30;
   }
 }
 </style>

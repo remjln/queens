@@ -2,5 +2,10 @@
 export default defineNuxtConfig({
   compatibilityDate: '2025-05-15',
   devtools: { enabled: true },
-  modules: ['@nuxt/icon', '@nuxtjs/tailwindcss']
+  modules: ['@nuxt/icon', '@nuxtjs/tailwindcss'],
+  app: {
+    head: {
+      title: 'Queens',
+    }
+  }
 })
