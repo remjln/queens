@@ -27,6 +27,7 @@
 
 <script lang="ts" setup>
 import Rand, { PRNG } from 'rand-seed'
+import { primaryInput } from 'detect-it'
 
 const route = useRoute()
 const level = route.query.level
@@ -208,8 +209,7 @@ const grid = ref<Cell[][]>()
 grid.value = generateBoard(gridSize)
 
 onMounted(() => {
-  touch.value = matchMedia('(hover: none) and (pointer: coarse)').matches
-  matchMedia('(hover: none) and (pointer: coarse)').addEventListener('change', e => touch.value = e.matches)
+  touch.value = primaryInput === 'touch'
   document.addEventListener('mouseup', () => mousedown.value = false)
   document.addEventListener('pointerup', () => mousedown.value = false)
 })
