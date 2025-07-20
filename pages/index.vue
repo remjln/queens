@@ -1,5 +1,9 @@
 <template>
-  <div class="flex items-center justify-center max-w-xl mx-auto my-2 p-2">
+  <div class="flex flex-col items-center justify-center max-w-xl mx-auto p-2 space-y-2">
+    <div class="flex flex-row items-center">
+      <Icon name="tabler:chess-queen-filled" class="size-8 text-neutral-700"></Icon>
+      <h1 class="text-3xl text-neutral-700">Queens</h1>
+    </div>
     <div v-if="grid" class="w-full grid select-none touch-none border border-neutral-700/90"
       :style="{ gridTemplateColumns: `repeat(${gridSize}, 1fr)`, gridTemplateRows: `repeat(${gridSize}, 1fr)` }">
       <template v-for="y in gridSize" :key="`y${y}`">
