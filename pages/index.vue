@@ -61,52 +61,52 @@ interface Cell {
   y: number
   zone: number
   isQueen: boolean
-  content: 'queen' | 'auto-marker' | 'user-marker' | null
-}
-
-function putMarkersForQueen(x: number, y: number) {
-  if (!grid.value) return
-
-  for (let i = 0; i < grid.value.length; i++)
-    if (!grid.value[i][x].content)
-      grid.value[i][x].content = 'auto-marker'
-  for (let i = 0; i < grid.value[y].length; i++)
-    if (!grid.value[y][i].content)
-      grid.value[y][i].content = 'auto-marker'
-
-  if (x + 1 < gridSize && y + 1 < gridSize && !grid.value[y + 1][x + 1].content)
-    grid.value[y + 1][x + 1].content = 'auto-marker'
-  if (x - 1 >= 0 && y - 1 >= 0 && !grid.value[y - 1][x - 1].content)
-    grid.value[y - 1][x - 1].content = 'auto-marker'
-  if (x + 1 < gridSize && y - 1 >= 0 && !grid.value[y - 1][x + 1].content)
-    grid.value[y - 1][x + 1].content = 'auto-marker'
-  if (x - 1 >= 0 && y + 1 < gridSize && !grid.value[y + 1][x - 1].content)
-    grid.value[y + 1][x - 1].content = 'auto-marker'
-
-  grid.value[y][x].content = 'queen'
-}
-
-function removeMarkersForQueen(x: number, y: number) {
-  if (!grid.value) return
-
-  for (let i = 0; i < grid.value.length; i++)
-    if (grid.value[i][x].content === 'auto-marker')
-      grid.value[i][x].content = null
-  for (let i = 0; i < grid.value[y].length; i++)
-    if (grid.value[y][i].content === 'auto-marker')
-      grid.value[y][i].content = null
-
-  if (x + 1 < gridSize && y + 1 < gridSize && grid.value[y + 1][x + 1].content === 'auto-marker')
-    grid.value[y + 1][x + 1].content = null
-  if (x - 1 >= 0 && y - 1 >= 0 && grid.value[y - 1][x - 1].content === 'auto-marker')
-    grid.value[y - 1][x - 1].content = null
-  if (x + 1 < gridSize && y - 1 >= 0 && grid.value[y - 1][x + 1].content === 'auto-marker')
-    grid.value[y - 1][x + 1].content = null
-  if (x - 1 >= 0 && y + 1 < gridSize && grid.value[y + 1][x - 1].content === 'auto-marker')
-    grid.value[y + 1][x - 1].content = null
+  content: 'queen' | 'user-marker' | `auto-marker-${number}-${number}` | null
 }
 
 function onCellClick(x: number, y: number) {  
+  function putMarkersForQueen(x: number, y: number) {
+    if (!grid.value) return
+
+    for (let i = 0; i < grid.value.length; i++)
+      if (!grid.value[i][x].content)
+        grid.value[i][x].content = `auto-marker-${x}-${y}`
+    for (let i = 0; i < grid.value[y].length; i++)
+      if (!grid.value[y][i].content)
+        grid.value[y][i].content = `auto-marker-${x}-${y}`
+
+    if (x + 1 < gridSize && y + 1 < gridSize && !grid.value[y + 1][x + 1].content)
+      grid.value[y + 1][x + 1].content = `auto-marker-${x}-${y}`
+    if (x - 1 >= 0 && y - 1 >= 0 && !grid.value[y - 1][x - 1].content)
+      grid.value[y - 1][x - 1].content = `auto-marker-${x}-${y}`
+    if (x + 1 < gridSize && y - 1 >= 0 && !grid.value[y - 1][x + 1].content)
+      grid.value[y - 1][x + 1].content = `auto-marker-${x}-${y}`
+    if (x - 1 >= 0 && y + 1 < gridSize && !grid.value[y + 1][x - 1].content)
+      grid.value[y + 1][x - 1].content = `auto-marker-${x}-${y}`
+
+    grid.value[y][x].content = 'queen'
+  }
+
+  function removeMarkersForQueen(x: number, y: number) {
+    if (!grid.value) return
+
+    for (let i = 0; i < grid.value.length; i++)
+      if (grid.value[i][x].content === `auto-marker-${x}-${y}`)
+        grid.value[i][x].content = null
+    for (let i = 0; i < grid.value[y].length; i++)
+      if (grid.value[y][i].content === `auto-marker-${x}-${y}`)
+        grid.value[y][i].content = null
+
+    if (x + 1 < gridSize && y + 1 < gridSize && grid.value[y + 1][x + 1].content === `auto-marker-${x}-${y}`)
+      grid.value[y + 1][x + 1].content = null
+    if (x - 1 >= 0 && y - 1 >= 0 && grid.value[y - 1][x - 1].content === `auto-marker-${x}-${y}`)
+      grid.value[y - 1][x - 1].content = null
+    if (x + 1 < gridSize && y - 1 >= 0 && grid.value[y - 1][x + 1].content === `auto-marker-${x}-${y}`)
+      grid.value[y - 1][x + 1].content = null
+    if (x - 1 >= 0 && y + 1 < gridSize && grid.value[y + 1][x - 1].content === `auto-marker-${x}-${y}`)
+      grid.value[y + 1][x - 1].content = null
+  }
+
   if (!grid.value || !(mousedown.value || touch.value))
     return
 
